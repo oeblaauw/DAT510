@@ -122,7 +122,7 @@ public class FeistelCipher {
 		for (int[] pp : blocks) {
 			encryptBlock(pp);
 		}
-		System.out.println("Complete!");
+		System.out.println("Encryption complete!");
 	}
 
 	/**
@@ -188,11 +188,14 @@ public class FeistelCipher {
 	 * @return
 	 */
 	public int[] decrypt(int v[]) {
-		System.out.println("Length:" + v.length);
-
 		System.out.println("\nDecrypting message..");
 
-		/* Checks the length of the message, determine what to do */
+		
+		// Should not be necessary to pad with zeros. But in case someone
+		// has the wrong cipher text, it is better to pad with zeros, than getting error.
+		if (v.length % _blockSize != 0) {
+			v = padZeros(v);
+		}
 
 		// Creates a 2dim array, where the outer array consists of 64 (or block
 		// size) bits
@@ -215,7 +218,6 @@ public class FeistelCipher {
 
 		// Send each block to encryptBlock for encryption
 		for (int[] pp : blocks) {
-			System.out.println("New Block ");
 			int[] block = decryptBlock(pp);
 			for (int x : block) {
 				blockCopy[count] = x;
@@ -225,7 +227,7 @@ public class FeistelCipher {
 
 		/** Method for removing zeros to come here **/
 
-		System.out.println("\nComplete!");
+		System.out.println("\nDecryption complete!");
 
 		return blockCopy;
 	}
@@ -274,20 +276,22 @@ public class FeistelCipher {
 			RD[r + 1] = booleanXORVectors(LD[r], modRD);
 
 			// Optional print
-			System.out.println("\nRound " + r);
-			printArray(joinArrays(LD[r], RD[r]));
+			// System.out.println("\nRound " + r);
+			// printArray(joinArrays(LD[r], RD[r]));
 		}
-
-		System.out.println("\nRound " + numberOfRounds);
+		
 		// Optional print
+		// System.out.println("\nRound " + numberOfRounds);
+		
 		printArray(joinArrays(LD[numberOfRounds], RD[numberOfRounds]));
 
 		// Final permutation
 		LD[numberOfRounds + 1] = RD[numberOfRounds];
 		RD[numberOfRounds + 1] = LD[numberOfRounds];
-
-		System.out.println("\nRound " + ((int) numberOfRounds + 1));
-		printArray(joinArrays(LD[numberOfRounds + 1], RD[numberOfRounds + 1]));
+		
+		// Optional print
+		// System.out.println("\nRound " + ((int) numberOfRounds + 1));
+		// printArray(joinArrays(LD[numberOfRounds + 1], RD[numberOfRounds + 1]));
 
 		// Join the two halves into one array, and return
 		return joinArrays(LD[numberOfRounds + 1], RD[numberOfRounds + 1]);
@@ -316,12 +320,39 @@ public class FeistelCipher {
 	
 	/**
 	 * SubKey Generator. Based on the round number during encryption/decryption, and
-	 * _key, generate a sub-key.
+	 * _key, generate a subkey of block size.
 	 * @param roundNumber
 	 * @return
 	 */
 	public int[] getSubKey(int roundNumber) {
-		return null;
+		
+		// Creates a temporary array of size _blockSize, and fills it with -1 values
+		int[] temp = new int[_blockSize];
+		for(int i=0; i < temp.length; i++) {
+			temp[i] = -1;
+		}
+		
+		// The actual subkey which will be returned is created
+		int[] subkey = new int[_blockSize];
+		
+		// Fills the subkey with values from _key. It copies 1/4 of the key at a time
+		// starting from different positions. 
+		System.arraycopy(_key, roundNumber*8/4, subkey, 0, _blockSize/4);
+		System.arraycopy(_key, roundNumber*6/4, subkey, _blockSize/4, _blockSize/4);
+		System.arraycopy(_key, roundNumber*4/4, subkey, 3*_blockSize/4, _blockSize/4);
+		System.arraycopy(_key, roundNumber*2, subkey, _blockSize/2, _blockSize/4);
+		
+		// The above command basically copies 64 (blockSize) values from _key
+		// starting from the parameter roundNumber and ends 64 bits later. 
+		// To increase the security, the below function will permute the bits.
+		
+		String str = "";
+		for(int i: subkey) {
+			str += i;
+		}
+		
+		System.out.println(binaryToText(convertStringToArray(str)));
+		return subkey;
 	}
 	
 	/**
@@ -372,6 +403,13 @@ public class FeistelCipher {
 		}
 
 		return result;
+	}
+	
+	public int[] removePaddedZeros(int[] v) {
+		
+		
+		
+		return null;
 	}
 	
 	/**
