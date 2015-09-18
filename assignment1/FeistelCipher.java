@@ -14,44 +14,47 @@ public class FeistelCipher {
 	 * @param keyString
 	 */
 	public FeistelCipher(String keyString) {
-		_key = createBinaryArrayFromString(keyString);
+		_key = convertStringToArray(keyString, false);
 		_blockSize = 64;
 		numberOfRounds = 16;
 		Scanner scan = new Scanner(System.in);
-		System.out.println("Welcome to FeistelCipher. Enter q for exiting the program.");
+
+		System.out.println("Welcome to FeistelCipher. " +
+				"Enter q for exiting the program.");
 
 		do {
-			System.out.println("\nEnter 'e' for encryption and 'd' for decryption," + " or 'q' for quit:");
+			System.out.println("\nEnter 'e' for encryption and 'd' for decryption,"
+							+ " or 'q' for quit:");
 			String command = scan.nextLine();
 
 			if (command.equals("e")) {
 				System.out.println("Enter message to encrypt in plaintext:");
 				String message = scan.nextLine();
 
+				// Check for empty plaintext
 				if (message.length() == 0) {
 					System.err.println("Failed to encrypt empty message. Please try again.");
 					continue;
 				}
-				int[] messageBinary = createBinaryArrayFromString(message);
+
+				// Convert message string to array in binary format
+				int[] messageBinary = convertStringToArray(message, false);
 
 				// Run the encryption
 				encrypt(messageBinary);
 
 			} else if (command.equals("d")) {
-				// Prompts user for decryption message
-				System.out.println("Enter message to decrypt in binary:");
+				System.out.println("Enter ciphertext to decrypt in binary, in one line:");
 				String decryptString = scan.nextLine();
 
+				// Check for empty ciphertext
 				if (decryptString.length() == 0) {
 					System.err.println("Failed to decrypt empty message. Please try again.");
 					continue;
 				}
 
-				// Remove white space
-				decryptString.replace("\\s+", "");
-
 				// Run the decryption
-				int[] d = decrypt(convertStringToArray(decryptString));
+				int[] d = decrypt(convertStringToArray(decryptString, true));
 
 				// Prints the decoded message in plain text
 				if (d != null) {
@@ -60,42 +63,42 @@ public class FeistelCipher {
 				}
 
 			} else if (command.equals("q")) {
+				System.out.println("See you later!");
 				break;
-			} else {
-				System.err.println("Error in input. You entered '" + command + "'\nPlease try again.");
-			}
-		} while (true);
 
+			} else {
+				System.err.println("Input error. \nYou entered '" + command
+						+ "'\nPlease try again.");
+			}
+
+		} while (true);
 	}
 
 	/**
-	 * Main method. Creates an instance of the class FeistelCipher.
-	 * Determine key here.
+	 * Main method. Creates an instance of the class FeistelCipher. Determine
+	 * key here.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String keyString = "ASECRETKEYISNICE";
-		FeistelCipher cipher = new FeistelCipher(keyString);
-
+		// Assign the key string
+		String keyString = "bL4AuW8UBlKsCUb3";
+		
+		// Run a new instance of FeistelCipher
+		new FeistelCipher(keyString);
 	}
 
 	/**
 	 * Function to encrypt a message. Message input is an array, binary format
 	 * Checks the message size, splits into blocks of blockSize if necessary.
 	 * Pad with zeros if necessary Send blocks to encryptBlock function for
-	 * encryption
+	 * encryption. This is further discussed in the report, under the Implementation part.
 	 * 
 	 * @param v
 	 */
 	public void encrypt(int v[]) {
 
-		// Check that message is not null
-		if (v.length == 0 || v == null) {
-			System.err.println("Failed to encrypt empty message. Please try again.");
-			return;
-		}
-
-		System.out.println("\nEncrypting message..");
+		System.out.println("\nEncrypting Message:");
 
 		/* Checks the length of the message, determine what to do */
 
@@ -122,12 +125,11 @@ public class FeistelCipher {
 		for (int[] pp : blocks) {
 			encryptBlock(pp);
 		}
-		System.out.println("Complete!");
 	}
 
 	/**
 	 * Function that encrypts a block (array v) of size 64 (or block size)
-	 * Returns encrypted array
+	 * Returns encrypted array. This is further discussed in the report, under the Implementation part.
 	 * 
 	 * @param v
 	 * @return
@@ -153,7 +155,8 @@ public class FeistelCipher {
 		// Sets the initial arrays
 		LE[0] = left;
 		RE[0] = right;
-
+		
+		
 		// For each round
 		for (int r = 0; r < numberOfRounds; r++) {
 			// Send REx to LEx+1
@@ -170,29 +173,35 @@ public class FeistelCipher {
 		LE[numberOfRounds + 1] = RE[numberOfRounds];
 		RE[numberOfRounds + 1] = LE[numberOfRounds];
 
+
 		// Join the two halves into one array, and return
 		int[] c = joinArrays(LE[numberOfRounds + 1], RE[numberOfRounds + 1]);
 
 		for (int i : c) {
 			System.out.print(i);
 		}
-		System.out.println("");
+
 		return c;
 	}
 
 	/**
-	 * Function to decrypt a message. Message input is an array in binary format.
-	 * Divides input into blocks (arrays) of block size, and sends each block to
-	 * the function decryptBlock for decryption.
+	 * Function to decrypt a message. Message input is an array in binary
+	 * format. Divides input into blocks (arrays) of block size, and sends each
+	 * block to the function decryptBlock for decryption. This is further discussed 
+	 * in the report, under the Implementation part.
+	 * 
 	 * @param v
 	 * @return
 	 */
 	public int[] decrypt(int v[]) {
-		System.out.println("Length:" + v.length);
-
 		System.out.println("\nDecrypting message..");
 
-		/* Checks the length of the message, determine what to do */
+		// Should not be necessary to pad with zeros. But in case someone
+		// has the wrong cipher text, it is better to pad with zeros, than
+		// getting error.
+		if (v.length % _blockSize != 0) {
+			v = padZeros(v);
+		}
 
 		// Creates a 2dim array, where the outer array consists of 64 (or block
 		// size) bits
@@ -215,7 +224,6 @@ public class FeistelCipher {
 
 		// Send each block to encryptBlock for encryption
 		for (int[] pp : blocks) {
-			System.out.println("New Block ");
 			int[] block = decryptBlock(pp);
 			for (int x : block) {
 				blockCopy[count] = x;
@@ -223,16 +231,17 @@ public class FeistelCipher {
 			}
 		}
 
-		/** Method for removing zeros to come here **/
+		//Removes padded zeros
+		blockCopy = removePaddedZeros(blockCopy);
 
-		System.out.println("\nComplete!");
+		System.out.println("Decryption complete!");
 
 		return blockCopy;
 	}
 
 	/**
 	 * Function that decrypts a block (array v) of size 64 (or block size)
-	 * Returns decrypted array
+	 * Returns decrypted array. This is further discussed in the report, under the Implementation part.
 	 * 
 	 * @param v
 	 * @return
@@ -263,39 +272,27 @@ public class FeistelCipher {
 			// Send RDx to LDx+1
 			LD[r + 1] = RD[r];
 
-			// Send RDx to round function F along with round number, result =
-			// modRD
-			// In this case, round number should be opposite of encryption, in
-			// order
-			// for the decryption to use the correct subkey.
-			int[] modRD = roundFunction(RD[r], numberOfRounds - r);
+			// Send RDx to round function F along with round number, result = modRD
+			// In this case, round number should be opposite of encryption,
+			// in order for the decryption to use the correct subkey.
+			int[] modRD = roundFunction(RD[r], numberOfRounds - r - 1);
 
 			// Perform XOR operation on LDr and modRD, send result to REx+1
 			RD[r + 1] = booleanXORVectors(LD[r], modRD);
-
-			// Optional print
-			System.out.println("\nRound " + r);
-			printArray(joinArrays(LD[r], RD[r]));
 		}
-
-		System.out.println("\nRound " + numberOfRounds);
-		// Optional print
-		printArray(joinArrays(LD[numberOfRounds], RD[numberOfRounds]));
 
 		// Final permutation
 		LD[numberOfRounds + 1] = RD[numberOfRounds];
 		RD[numberOfRounds + 1] = LD[numberOfRounds];
-
-		System.out.println("\nRound " + ((int) numberOfRounds + 1));
-		printArray(joinArrays(LD[numberOfRounds + 1], RD[numberOfRounds + 1]));
-
+	
 		// Join the two halves into one array, and return
 		return joinArrays(LD[numberOfRounds + 1], RD[numberOfRounds + 1]);
 	}
 
-	/** 
-	 * Splits a block (array v) of block size, into two halves. Return
-	 * 2 dim array, containing the two halves.
+	/**
+	 * Splits a block (array v) of block size, into two halves. Return 2 dim
+	 * array, containing the two halves.
+	 * 
 	 * @param v
 	 * @return
 	 */
@@ -313,20 +310,30 @@ public class FeistelCipher {
 
 		return splits;
 	}
-	
+
 	/**
-	 * SubKey Generator. Based on the round number during encryption/decryption, and
-	 * _key, generate a sub-key.
+	 * SubKey Generator. Based on the round number during encryption/decryption,
+	 * and _key, generate a subkey that is the same size as block size. This function is
+	 * further explained in the report, under the section Implementation -> Sub key generation algorithm
+	 * 
 	 * @param roundNumber
 	 * @return
 	 */
 	public int[] getSubKey(int roundNumber) {
-		return null;
+
+		// The subkey array is initialized
+		int[] subkey = new int[_blockSize];
+
+		// Fills the subkey with values from _key. Shifting by roundNumber * 2
+		System.arraycopy(_key, roundNumber*2, subkey, 0, _blockSize);
+
+		return subkey;
 	}
-	
+
 	/**
 	 * Round function F, that performs a bitwise substitution based on array and
-	 * round number
+	 * round number. This is further explained in the report, under the section 
+	 * Implementation -> Round Function (F)
 	 * 
 	 * @param rv
 	 * @return
@@ -339,30 +346,29 @@ public class FeistelCipher {
 		int[] subKey = getSubKey(roundNumber);
 
 		// Perform a substitution based on subkey
-
 		for (int i = 0; i < rv.length; i++) {
 			if (i % 2 == 0) {
-				modV[i] = rv[i] & _key[i * 2];
+				modV[i] = rv[i] & subKey[i];
 			} else if (i % 3 == 0) {
-				modV[i] = rv[i] | _key[i * 3];
+				modV[i] = rv[i] | subKey[i];
 			} else {
-				modV[i] = rv[i] ^ _key[i];
+				modV[i] = rv[i] ^ subKey[i];
 			}
 		}
 		return modV;
 	}
 
 	/**
-	 * Function that performs the XOR operator on two vector, bit by bit
-	 * 
+	 * Function that performs the XOR operator on two vectors, bit by bit
+	 * Paramters a and b must be of equal length.
 	 * @param a
 	 * @param b
 	 * @return
 	 */
-	public static int[] booleanXORVectors(int[] a, int[] b) {
+	public int[] booleanXORVectors(int[] a, int[] b) {
 		int length = a.length;
 		if (length != b.length) {
-			System.err.println("Error..");
+			System.err.println("Error, the two arrays are not equal in length.");
 			return null;
 		}
 
@@ -373,7 +379,44 @@ public class FeistelCipher {
 
 		return result;
 	}
-	
+
+	/** Function that removes padded zeros behind an array. 
+	 * The function starts from the back of the array, and counts the number
+	 * of consecutive zeros. For each round of 8 consecutive zeros, remove that byte of zeros.
+	 * Break if hit anything else than zero.
+	 * @param v
+	 * @return
+	 */
+	public int[] removePaddedZeros(int[] v) {
+		int countZeros = 0;
+		int countRemove = 0;
+		
+		// Start from the back of the array
+		for (int i = v.length - 1; i >= 0; i--) {
+			// If the value equals to zero, increase countZeros
+			if (v[i] == 0) {
+				countZeros++;
+			} 
+			// When hitting anything else than zero, break.
+			else {
+				break;
+			}
+		}
+		// Calculate the number of bytes to remove.
+		countRemove = countZeros / 8;
+
+		// The new length of the array
+		int length = v.length - 8 * countRemove;
+		
+		// Creates a new modified vector
+		int[] modV = new int[length];
+		
+		// Copy values (except the padded zeros) into the new array, and return
+		System.arraycopy(v, 0, modV, 0, length);
+
+		return modV;
+	}
+
 	/**
 	 * Function that pads a vector with zeros, in order for the array to be
 	 * divisible by block size
@@ -406,7 +449,7 @@ public class FeistelCipher {
 
 		return copy;
 	}
-	
+
 	/**
 	 * Function that join two arrays, a first, b last
 	 * 
@@ -418,14 +461,16 @@ public class FeistelCipher {
 		int aLen = a.length;
 		int bLen = b.length;
 		int[] c = new int[aLen + bLen];
+		// Copy array a into the first half of c
 		System.arraycopy(a, 0, c, 0, aLen);
+		// Copy array b into the last half of c
 		System.arraycopy(b, 0, c, aLen, bLen);
 
 		return c;
 	}
 
 	/**
-	 * Function for converting a string of ascii (plaintext) into a string in
+	 * Function for converting a string of plaintext into a string in
 	 * binary format
 	 * 
 	 * @param asciiString
@@ -445,7 +490,7 @@ public class FeistelCipher {
 	}
 
 	/**
-	 * Function for converting an array in binary format, to a string of
+	 * Function for converting an array of binary numbers, to a string of
 	 * plaintext
 	 * 
 	 * @param binary
@@ -471,26 +516,16 @@ public class FeistelCipher {
 	}
 
 	/**
-	 * Function that creates and returns an array in binary format, from a
-	 * string of plaintext
-	 * 
-	 * @param keyString
-	 * @return
-	 */
-	public int[] createBinaryArrayFromString(String keyString) {
-		String binaryString = textToBinary(keyString);
-		return convertStringToArray(binaryString);
-	}
-
-	/**
-	 * Function that converts a string into an array of integers The str
-	 * parameter should be a string in binary format
-	 * 
+	 * Function that converts a string into an array of integers 
+	 * @param binaryInput: If true, the str is in binary format. If false, plaintext format.
 	 * @param str
 	 * @return
 	 */
-	public int[] convertStringToArray(String str) {
-
+	public int[] convertStringToArray(String str, boolean binaryInput) {
+		// Converts string to binary format
+		if(!binaryInput) {
+			str = textToBinary(str);
+		}
 		// The code removes the first entry, which is empty because of the split
 		// method.
 		String[] org = str.split("");
@@ -503,7 +538,7 @@ public class FeistelCipher {
 	}
 
 	/**
-	 * Function that prints all values from an array to Console
+	 * Function that prints all values from an array of integers to Console
 	 * 
 	 * @param array
 	 */
