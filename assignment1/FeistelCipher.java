@@ -8,6 +8,10 @@ public class FeistelCipher {
 	private int numberOfRounds;
 	private int[][] LE, RE, LD, RD;
 
+	/**
+	 * Public method of FeistelCipher
+	 * Includes initialization and user input
+	 */
 	@SuppressWarnings("resource")
 	/**
 	 * Initialize the instance of FeistelCipher. Asks user for input.
@@ -92,7 +96,12 @@ public class FeistelCipher {
 	 * Function to encrypt a message. Message input is an array, binary format
 	 * Checks the message size, splits into blocks of blockSize if necessary.
 	 * Pad with zeros if necessary Send blocks to encryptBlock function for
+<<<<<<< HEAD
 	 * encryption. This is further discussed in the report, under the Implementation part.
+=======
+	 * encryption. This is further discussed in the report, under the Implementation part,
+	 * Encryption part 1.
+>>>>>>> origin/master
 	 * 
 	 * @param v
 	 */
@@ -129,7 +138,12 @@ public class FeistelCipher {
 
 	/**
 	 * Function that encrypts a block (array v) of size 64 (or block size)
+<<<<<<< HEAD
 	 * Returns encrypted array. This is further discussed in the report, under the Implementation part.
+=======
+	 * Returns encrypted array. This is further discussed in the report, under the Implementation part,
+	 * encryption part 2.
+>>>>>>> origin/master
 	 * 
 	 * @param v
 	 * @return
@@ -188,7 +202,11 @@ public class FeistelCipher {
 	 * Function to decrypt a message. Message input is an array in binary
 	 * format. Divides input into blocks (arrays) of block size, and sends each
 	 * block to the function decryptBlock for decryption. This is further discussed 
+<<<<<<< HEAD
 	 * in the report, under the Implementation part.
+=======
+	 * in the report, under the Implementation part, decryption part 1.
+>>>>>>> origin/master
 	 * 
 	 * @param v
 	 * @return
@@ -241,7 +259,12 @@ public class FeistelCipher {
 
 	/**
 	 * Function that decrypts a block (array v) of size 64 (or block size)
+<<<<<<< HEAD
 	 * Returns decrypted array. This is further discussed in the report, under the Implementation part.
+=======
+	 * Returns decrypted array. This is further discussed in the report, under the Implementation part,
+	 * decryption part 2.
+>>>>>>> origin/master
 	 * 
 	 * @param v
 	 * @return
@@ -290,47 +313,6 @@ public class FeistelCipher {
 	}
 
 	/**
-	 * Splits a block (array v) of block size, into two halves. Return 2 dim
-	 * array, containing the two halves.
-	 * 
-	 * @param v
-	 * @return
-	 */
-	public int[][] splitBlock(int[] v) {
-		int length = v.length / 2;
-		int[] left = new int[length];
-		int[] right = new int[length];
-
-		for (int p = 0; p < length; p++) {
-			left[p] = v[p];
-			right[p] = v[p + length];
-		}
-
-		int[][] splits = { left, right };
-
-		return splits;
-	}
-
-	/**
-	 * SubKey Generator. Based on the round number during encryption/decryption,
-	 * and _key, generate a subkey that is the same size as block size. This function is
-	 * further explained in the report, under the section Implementation -> Sub key generation algorithm
-	 * 
-	 * @param roundNumber
-	 * @return
-	 */
-	public int[] getSubKey(int roundNumber) {
-
-		// The subkey array is initialized
-		int[] subkey = new int[_blockSize];
-
-		// Fills the subkey with values from _key. Shifting by roundNumber * 2
-		System.arraycopy(_key, roundNumber*2, subkey, 0, _blockSize);
-
-		return subkey;
-	}
-
-	/**
 	 * Round function F, that performs a bitwise substitution based on array and
 	 * round number. This is further explained in the report, under the section 
 	 * Implementation -> Round Function (F)
@@ -356,6 +338,68 @@ public class FeistelCipher {
 			}
 		}
 		return modV;
+	}
+	
+	
+	/**
+	 * SubKey Generator. Based on the round number during encryption/decryption,
+	 * and _key, generate a subkey that is the same size as block size. This function is
+	 * further explained in the report, under the section Implementation -> Sub key generation algorithm
+	 * 
+	 * @param roundNumber
+	 * @return
+	 */
+	public int[] getSubKey(int roundNumber) {
+
+		// The subkey array is initialized
+		int[] subkey = new int[_blockSize];
+
+		// Fills the subkey with values from _key. Shifting by roundNumber * 2
+		System.arraycopy(_key, roundNumber*2, subkey, 0, _blockSize);
+
+		return subkey;
+	}
+	
+	/**
+<<<<<<< HEAD
+	 * Round function F, that performs a bitwise substitution based on array and
+	 * round number. This is further explained in the report, under the section 
+	 * Implementation -> Round Function (F)
+=======
+	 * Splits a block (array v) of block size, into two halves. Return 2 dim
+	 * array, containing the two halves.
+>>>>>>> origin/master
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public int[][] splitBlock(int[] v) {
+		int length = v.length / 2;
+		int[] left = new int[length];
+		int[] right = new int[length];
+
+		for (int p = 0; p < length; p++) {
+			left[p] = v[p];
+			right[p] = v[p + length];
+		}
+
+<<<<<<< HEAD
+		// Perform a substitution based on subkey
+		for (int i = 0; i < rv.length; i++) {
+			if (i % 2 == 0) {
+				modV[i] = rv[i] & subKey[i];
+			} else if (i % 3 == 0) {
+				modV[i] = rv[i] | subKey[i];
+			} else {
+				modV[i] = rv[i] ^ subKey[i];
+			}
+		}
+		return modV;
+=======
+		int[][] splits = { left, right };
+
+		return splits;
+>>>>>>> origin/master
 	}
 
 	/**
